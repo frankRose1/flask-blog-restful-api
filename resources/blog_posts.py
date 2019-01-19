@@ -1,6 +1,7 @@
 import datetime
 from flask import Blueprint
 from flask_restful import Resource, Api
+from models.blogpost import BlogPost
 
 
 class BlogPostList(Resource):
@@ -15,7 +16,7 @@ class BlogPostList(Resource):
         ]}
 
 
-class BlogPost(Resource):
+class Post(Resource):
     def get(self, post_id):
         return {'title': 'Random Title', '': datetime.datetime.now()}
 
@@ -34,7 +35,7 @@ api.add_resource(
     endpoint='posts'
 )
 api.add_resource(
-    BlogPost,
+    Post,
     '/posts/<int:post_id>',
     endpoint='post'
 )
