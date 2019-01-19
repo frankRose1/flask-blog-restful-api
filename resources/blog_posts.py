@@ -36,5 +36,5 @@ api.add_resource(
 api.add_resource(
     BlogPost,
     '/posts/<int:post_id>',
-    'post'
+    endpoint='post'
 )
