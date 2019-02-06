@@ -6,14 +6,18 @@ from db import db
 # comments are a one to many relationship (one blog post many comments)
 
 
-class BlogPost(db.Model):
-    __tablename__ = 'blogposts'
+class PostModel(db.Model):
+    __tablename__ = 'posts'
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
     category = db.Column(db.String(50), nullable=True)
     content = db.Column(db.Text, nullable=False)
-    created_on = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    created_on = db.Column(db.DateTime, default=datetime.datetime.now)
+
+    @classmethod
+    def find_by_id(cls, id):
+        return cls.query.filter_by(id=id).first()
 
     @classmethod
     def find_all(cls):
