@@ -1,5 +1,5 @@
-from flask import Blueprint, request
-from flask_restful import Resource, Api, url_for
+from flask import Blueprint, request, url_for
+from flask_restful import Resource, Api
 
 from models.post import PostModel
 from schemas.post import PostSchema
@@ -80,8 +80,8 @@ class Post(Resource):
         )
 
 
-blog_posts_api = Blueprint('resources.posts', __name__)
-api = Api(blog_posts_api)
+posts_api = Blueprint('resources.posts', __name__)
+api = Api(posts_api)
 api.add_resource(
     PostList,
     '/posts',
