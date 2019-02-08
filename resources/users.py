@@ -1,6 +1,5 @@
 from flask import url_for, Blueprint, request
 from flask_restful import Resource, Api
-from marshmallow import ValidationError
 
 from models.user import UserModel
 from schemas.user import UserSchema
@@ -12,19 +11,17 @@ class User(Resource):
 
     @classmethod
     def post(cls):
-        try:
-            user = user_schema.load(request.get_json())
-        except ValidationError as err:
-            return err.messages, 400
+        user = user_schema.load(request.get_json())
 
         if UserModel.find_by_username(user.username):
             return {'message': 'That username has already been taken.'}, 400
 
+        user.password = UserModel.set_password(user.password)
         user.save_to_db()
         return (
             '',
             201,
-            {'Location': '/api/v1/auth'}
+            {'Location': url_for('resources.auth.login')}
         )
 
     @classmethod

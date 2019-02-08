@@ -3,7 +3,6 @@ from flask_restful import Resource, Api
 
 from models.post import PostModel
 from schemas.post import PostSchema
-from marshmallow import ValidationError
 
 POST_NOT_FOUND = 'Post not found.'
 
@@ -14,10 +13,7 @@ class PostList(Resource):
     @classmethod
     def post(cls):
         data = request.get_json()
-        try:
-            post = post_schema.load(data)
-        except ValidationError as err:
-            return err.messages, 400
+        post = post_schema.load(data)
 
         post.save_to_db()
 
@@ -47,10 +43,7 @@ class Post(Resource):
     # TODO check that author owns post
     @classmethod
     def put(cls, post_id):
-        try:
-            post_data = post_schema.load(request.get_json())
-        except ValidationError as err:
-            return err.messages, 400
+        post_data = post_schema.load(request.get_json())
 
         post = PostModel.find_by_id(id=post_id)
         if not post:
