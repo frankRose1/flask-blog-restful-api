@@ -18,19 +18,48 @@ app.config['PROPAGATE_EXCEPTIONS'] = True
 jwt = JWTManager(app)
 
 
-app.register_blueprint(posts_api, url_prefix='/api/v1')
-app.register_blueprint(users_api, url_prefix='/api/v1')
-app.register_blueprint(auth_api, url_prefix='/api/v1')
-
-
 @app.before_first_request
 def create_tables():
     db.create_all()
 
 
+@jwt.unauthorized_loader
+def missing_token_callback(error):
+    return jsonify(
+        {
+            'message': 'Authorization headers are missing or no access token was provided.',
+            'error': 'Unauthorized'
+         }
+    ), 401
+
+
+@jwt.expired_token_loader
+def expired_token_callback():
+    return jsonify(
+        {
+            'message': 'The provided access token has expired.',
+            'error': 'Expired token'
+         }
+    ), 401
+
+
+@jwt.invalid_token_loader
+def invalid_token_callback(error):
+    return jsonify(
+        {
+            'message': 'Token is invalid.',
+            'error': error
+        }
+    ), 422
+
 @app.route('/')
 def index():
     return 'Hello'
+
+
+app.register_blueprint(posts_api, url_prefix='/api/v1')
+app.register_blueprint(users_api, url_prefix='/api/v1')
+app.register_blueprint(auth_api, url_prefix='/api/v1')
 
 
 @app.errorhandler(ValidationError)

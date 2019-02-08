@@ -14,6 +14,8 @@ class PostModel(db.Model):
     category = db.Column(db.String(50), nullable=True)
     content = db.Column(db.Text, nullable=False)
     created_on = db.Column(db.DateTime, default=datetime.datetime.now)
+    author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    author = db.relationship('UserModel')
 
     @classmethod
     def find_by_id(cls, id):

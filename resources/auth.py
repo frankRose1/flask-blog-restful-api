@@ -23,7 +23,7 @@ class Login(Resource):
             user.verify_password(user_data.password)
         except VerifyMismatchError:
             return {'message': INVALID_CREDENTIALS}, 400
-        
+
         access_token = create_access_token(identity=user.id)
         return {'access_token': access_token}
 
