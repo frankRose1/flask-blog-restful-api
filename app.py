@@ -8,6 +8,9 @@ from ma import ma
 from resources.posts import posts_api
 from resources.users import users_api
 from resources.auth import auth_api
+from resources.comments import comments_api
+
+API_PREFIX = '/api/v1'
 
 app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = os.environ.get('SECRET_KEY')
@@ -57,9 +60,10 @@ def index():
     return 'Hello'
 
 
-app.register_blueprint(posts_api, url_prefix='/api/v1')
-app.register_blueprint(users_api, url_prefix='/api/v1')
-app.register_blueprint(auth_api, url_prefix='/api/v1')
+app.register_blueprint(posts_api, url_prefix=API_PREFIX)
+app.register_blueprint(users_api, url_prefix=API_PREFIX)
+app.register_blueprint(auth_api, url_prefix=API_PREFIX)
+app.register_blueprint(comments_api, url_prefix=API_PREFIX)
 
 
 @app.errorhandler(ValidationError)

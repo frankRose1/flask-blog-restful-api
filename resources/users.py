@@ -1,5 +1,6 @@
 from flask import url_for, Blueprint, request
 from flask_restful import Resource, Api
+from flask_jwt_extended import fresh_jwt_required, get_jwt_identity, jwt_required
 
 from models.user import UserModel
 from schemas.user import UserSchema
@@ -25,12 +26,35 @@ class User(Resource):
         )
 
     @classmethod
-    def put(cls):
-        return {'user': 'put request'}
+    @jwt_required
+    def get(cls):
+        user_id = get_jwt_identity()
+        user = UserModel.find_by_id(user_id)
+        if not user:
+            return {'message': 'User not found.'}, 404
+        return {'current_user': user_schema.dump(user)}, 200
 
     @classmethod
+    @fresh_jwt_required
+    def put(cls):
+        # updated_user_data = user_schema.load(request.get_json(), partial=('password'))
+        return {'message': 'put request to users api'}
+
+    @classmethod
+    @fresh_jwt_required
     def delete(cls):
-        return {'user': 'delete request'}
+        user_id = get_jwt_identity()
+        user = UserModel.find_by_id(user_id)
+        if not user:
+            return {'message': 'User not found.'}, 404
+        # TODO delete all of the associated posts/comments
+        user.delete_from_db()
+        return (
+            '',
+            204,
+            {'Location': 'resources.users.users'}
+        )
+
 
 
 users_api = Blueprint('resources.users', __name__)
