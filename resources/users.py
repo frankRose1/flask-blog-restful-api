@@ -3,7 +3,8 @@ from flask_restful import Resource, Api
 from flask_jwt_extended import fresh_jwt_required, get_jwt_identity, jwt_required
 
 from models.user import UserModel
-from schemas.user import UserSchema
+from schemas import UserSchema
+USER_NOT_FOUND = 'User not found.'
 
 user_schema = UserSchema()
 
@@ -28,10 +29,11 @@ class User(Resource):
     @classmethod
     @jwt_required
     def get(cls):
+        """Returns the currently signed in user"""
         user_id = get_jwt_identity()
         user = UserModel.find_by_id(user_id)
         if not user:
-            return {'message': 'User not found.'}, 404
+            return {'message': USER_NOT_FOUND}, 404
         return {'current_user': user_schema.dump(user)}, 200
 
     @classmethod
@@ -46,7 +48,7 @@ class User(Resource):
         user_id = get_jwt_identity()
         user = UserModel.find_by_id(user_id)
         if not user:
-            return {'message': 'User not found.'}, 404
+            return {'message': USER_NOT_FOUND}, 404
         # TODO delete all of the associated posts/comments
         user.delete_from_db()
         return (
@@ -56,6 +58,15 @@ class User(Resource):
         )
 
 
+class UserProfile(Resource):
+
+    @classmethod
+    def get(cls, username):
+        user = UserModel.find_by_username(username)
+        if not user:
+            return {'message': USER_NOT_FOUND}, 404
+        return {'user': user_schema.dump(user)}, 200
+
 
 users_api = Blueprint('resources.users', __name__)
 api = Api(users_api)
@@ -63,4 +74,9 @@ api.add_resource(
     User,
     '/users',
     endpoint='users'
+)
+api.add_resource(
+    UserProfile,
+    '/users/<username>',
+    endpoint="user_profile"
 )

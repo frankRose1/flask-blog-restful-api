@@ -3,7 +3,7 @@ from flask_restful import Resource, Api
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from models.post import PostModel
-from schemas.post import PostSchema
+from schemas import PostSchema
 
 POST_NOT_FOUND = 'Post not found.'
 
