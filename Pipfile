@@ -16,6 +16,7 @@ python-dotenv = "*"
 psycopg2 = "*"
 flask-jwt-extended = "*"
 argon2-cffi = "*"
+flask-limiter = "*"
 
 [requires]
 python_version = "3.7"

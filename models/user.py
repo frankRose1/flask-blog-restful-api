@@ -12,6 +12,7 @@ class UserModel(db.Model):
     name = db.Column(db.String(150), nullable=False)
     password = db.Column(db.String(100), nullable=False)
     posts = db.relationship('PostModel', backref='author')
+    comments = db.relationship('CommentModel', backref='author')
 
 
     @classmethod

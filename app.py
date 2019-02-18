@@ -1,6 +1,8 @@
 import os
 from flask import Flask, jsonify
 from flask_jwt_extended import JWTManager
+from flask_limiter import Limiter
+from flask_limiter.util import get_ipaddr
 from marshmallow import ValidationError
 
 from db import db
@@ -11,6 +13,8 @@ from resources.auth import auth_api
 from resources.comments import comments_api
 
 API_PREFIX = '/api/v1'
+daily_rate = os.environ.get('GLOBAL_DAILY_RATE')
+hourly_rate = os.environ.get('GLOBAL_HOURLY_RATE')
 
 app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = os.environ.get('SECRET_KEY')
@@ -19,6 +23,12 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
 jwt = JWTManager(app)
+
+limiter = Limiter(
+    app,
+    default_limits=[daily_rate, hourly_rate],
+    key_func=get_ipaddr
+)
 
 
 @app.before_first_request
@@ -57,7 +67,9 @@ def invalid_token_callback(error):
 
 @app.route('/')
 def index():
-    return 'Hello'
+    return jsonify({
+        'message': 'Welcome to the blog API.'
+    })
 
 
 app.register_blueprint(posts_api, url_prefix=API_PREFIX)

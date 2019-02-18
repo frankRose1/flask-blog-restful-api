@@ -4,19 +4,19 @@ from db import db
 
 class CommentModel(db.Model):
 
-    __tablename__='comments'
+    __tablename__ = 'comments'
 
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.Text, nullable=False)
     created_date = db.Column(db.DateTime, default=datetime.now)
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    author = db.relationship('UserModel')
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
 
     @classmethod
     def find_by_id(cls, comment_id):
         return cls.query.filter_by(id=comment_id).first()
 
-    def check_comment_author(self, user_id):
+    def verify_comment_author(self, user_id):
         if user_id == self.author_id:
             return True
         else:

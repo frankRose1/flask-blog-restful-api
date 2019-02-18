@@ -1,15 +1,14 @@
 from flask import Blueprint, request, url_for, abort
-from flask_restful import Api, Resource
+from flask_restful import Resource, Api
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from models.post import PostModel
-from models.user import UserModel
 from models.comment import CommentModel
-
 from schemas import CommentSchema
 comment_schema = CommentSchema()
-COMMENT_NOT_FOUND = 'Comment not found.'
 
+POST_NOT_FOUND = 'Post not found.'
+COMMENT_NOT_FOUND = 'Comment not found.'
 
 
 class CommentList(Resource):
@@ -17,15 +16,19 @@ class CommentList(Resource):
     @classmethod
     @jwt_required
     def post(cls, post_id):
+        post = PostModel.find_by_id(post_id)
+        if not post:
+            return {'message': POST_NOT_FOUND}, 404
         comment = comment_schema.load(request.get_json())
         user_id = get_jwt_identity()
         comment.author_id = user_id
+        comment.post_id = post.id
         comment.save_to_db()
         
         return (
             '',
             201,
-            {'Location': url_for('resources.comments.comment', comment_id=comment.id)}
+            {'Location': url_for('resources.posts.post', post_id=post.id)}
         )
 
 
@@ -47,12 +50,12 @@ class Comment(Resource):
         """Update a comment with provided ID, check that user owns the comment"""
         comment_data = comment_schema.load(request.get_json())
 
-        comment = Comment.find_by_id(comment_id)
+        comment = CommentModel.find_by_id(comment_id)
         if not comment:
             return {'message': COMMENT_NOT_FOUND}, 404
 
         user_id = get_jwt_identity()
-        if not comment.check_comment_author(user_id):
+        if not comment.verify_comment_author(user_id):
             abort(403)
 
         comment.body = comment_data.body
@@ -72,24 +75,19 @@ class Comment(Resource):
             return {'message': COMMENT_NOT_FOUND}, 404
         
         user_id = get_jwt_identity()
-        if not comment.check_comment_author(user_id):
+        if not comment.verify_comment_author(user_id):
             abort(403)
 
         comment.delete_from_db()
         return (
             '',
             204,
-            {'Location': url_for('resources.comments.comments')}
+            {'Location': url_for('resources.posts.posts')}
         )
 
 
 comments_api = Blueprint('resources.comments', __name__)
 api = Api(comments_api)
-api.add_resource(
-    CommentList,
-    '/comments',
-    endpoint='comments'
-)
 api.add_resource(
     Comment,
     '/comments/<int:comment_id>',

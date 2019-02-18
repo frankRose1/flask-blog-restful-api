@@ -4,6 +4,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from models.post import PostModel
 from schemas import PostSchema
+from resources.comments import CommentList
 
 POST_NOT_FOUND = 'Post not found.'
 
@@ -58,7 +59,9 @@ class Post(Resource):
         if not post:
             return {'message': POST_NOT_FOUND}, 404
 
-        is_post_author(get_jwt_identity(), post)
+        user_id = get_jwt_identity()
+        if not post.verify_post_author(user_id):
+            abort(403)
 
         post.title = post_data.title
         post.category = post_data.category
@@ -77,7 +80,9 @@ class Post(Resource):
         if not post:
             return {'message': POST_NOT_FOUND}, 404
 
-        is_post_author(get_jwt_identity(), post)
+        user_id = get_jwt_identity()
+        if not post.verify_post_author(user_id):
+            abort(403)
 
         post.delete_from_db()
         return (
@@ -98,4 +103,9 @@ api.add_resource(
     Post,
     '/posts/<int:post_id>',
     endpoint='post'
+)
+api.add_resource(
+    CommentList,
+    '/posts/<int:post_id>/comments',
+    endpoint='comments'
 )

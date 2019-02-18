@@ -6,7 +6,7 @@ from models.comment import CommentModel
 
 class PostSchema(ma.ModelSchema):
     author = ma.Nested('UserSchema', only=['username'])
-
+    comments = ma.Nested('CommentSchema', many=True, only=['body', 'author', 'created_date'])
     class Meta:
         model = PostModel
         # load_only will not be dumped
@@ -16,16 +16,17 @@ class PostSchema(ma.ModelSchema):
 
 
 class UserSchema(ma.ModelSchema):
-    posts = ma.Nested(PostSchema, many=True, only=['title', 'id'])
+    posts = ma.Nested(PostSchema, many=True, only=['title', 'id', 'created_on'])
     class Meta:
         model = UserModel
         load_only = ('password',)
         dump_only = ('id',)
 
 
-class CommentSchema(ma.Schema):
+class CommentSchema(ma.ModelSchema):
 
-    author = ma.Nested(UserSchema)
+    author = ma.Nested(UserSchema, only=['username'])
+    post = ma.Nested(PostSchema, only=['id', 'title'])
 
     class Meta:
         model = CommentModel
