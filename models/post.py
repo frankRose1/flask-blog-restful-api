@@ -1,5 +1,5 @@
 import datetime
-from db import db
+from lib.db import db
 
 
 class PostModel(db.Model):
@@ -11,21 +11,21 @@ class PostModel(db.Model):
     content = db.Column(db.Text, nullable=False)
     created_on = db.Column(db.DateTime, default=datetime.datetime.now)
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    comments = db.relationship('CommentModel', backref='post')
+    comments = db.relationship('CommentModel', cascade="all,delete", backref='post')
 
     @classmethod
     def find_by_id(cls, id):
         return cls.query.filter_by(id=id).first()
 
     @classmethod
-    def find_all(cls):
-        return cls.query.all()
+    def page(cls, page_num, per_page):
+        return cls.query.paginate(page_num, per_page, False)
 
     @classmethod
     def find_by_category(cls, category):
         return cls.query.filter_by(category=category)
 
-    def verify_post_owner(self, user_id):
+    def verify_post_author(self, user_id):
         if user_id == self.author_id:
             return True
         else:

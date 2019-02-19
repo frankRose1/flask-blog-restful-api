@@ -1,4 +1,4 @@
-from ma import ma
+from . ma import ma
 from models.post import PostModel
 from models.user import UserModel
 from models.comment import CommentModel

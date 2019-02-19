@@ -3,17 +3,13 @@ from flask_restful import Resource, Api
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from models.post import PostModel
-from schemas import PostSchema
+from lib.schemas import PostSchema
 from resources.comments import CommentList
 
 POST_NOT_FOUND = 'Post not found.'
 
 post_schema = PostSchema()
-
-
-def is_post_author(user_id, post):
-    if user_id != post.author_id:
-        abort(403)
+post_list_schema = PostSchema(many=True)
 
 
 class PostList(Resource):
@@ -35,10 +31,24 @@ class PostList(Resource):
 
     @classmethod
     def get(cls):
-        return {'posts': [
-            {'title': 'Random Title'},
-            {'title': 'another Title'}
-        ]}
+        page_num = request.args.get('page_num', 1)
+        per_page = request.args.get('per_page', 10)
+        try:
+            page_num = int(page_num)
+            per_page = int(per_page)
+        except ValueError:
+            return {'message': 'Make sure page_num and per_page are integers.'}, 400
+        if per_page > 10:
+            per_page = 10
+        
+        paginate = PostModel.page(page_num, per_page)
+        return {
+                'posts': post_list_schema.dump(paginate.items),
+                'has_next': paginate.has_next,
+                'has_prev': paginate.has_prev,
+                'next_page': paginate.next_num,
+                'prev_page': paginate.prev_num
+            }
 
 
 class Post(Resource):
@@ -101,11 +111,11 @@ api.add_resource(
 )
 api.add_resource(
     Post,
-    '/posts/<int:post_id>',
+    '/post/<int:post_id>',
     endpoint='post'
 )
 api.add_resource(
     CommentList,
-    '/posts/<int:post_id>/comments',
+    '/post/<int:post_id>/comments',
     endpoint='comments'
 )

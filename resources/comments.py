@@ -4,7 +4,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from models.post import PostModel
 from models.comment import CommentModel
-from schemas import CommentSchema
+from lib.schemas import CommentSchema
 comment_schema = CommentSchema()
 
 POST_NOT_FOUND = 'Post not found.'
@@ -90,6 +90,6 @@ comments_api = Blueprint('resources.comments', __name__)
 api = Api(comments_api)
 api.add_resource(
     Comment,
-    '/comments/<int:comment_id>',
+    '/comment/<int:comment_id>',
     endpoint='comment'
 )

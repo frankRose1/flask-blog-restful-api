@@ -1,4 +1,4 @@
-from db import db
+from lib.db import db
 from argon2 import PasswordHasher
 
 password_hasher = PasswordHasher()
@@ -11,8 +11,8 @@ class UserModel(db.Model):
     username = db.Column(db.String(100), nullable=False, unique=True)
     name = db.Column(db.String(150), nullable=False)
     password = db.Column(db.String(100), nullable=False)
-    posts = db.relationship('PostModel', backref='author')
-    comments = db.relationship('CommentModel', backref='author')
+    posts = db.relationship('PostModel', cascade="all,delete", backref='author')
+    comments = db.relationship('CommentModel', cascade="all,delete", backref='author')
 
 
     @classmethod

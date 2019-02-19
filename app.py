@@ -5,8 +5,8 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_ipaddr
 from marshmallow import ValidationError
 
-from db import db
-from ma import ma
+from lib.db import db
+from lib.ma import ma
 from resources.posts import posts_api
 from resources.users import users_api
 from resources.auth import auth_api

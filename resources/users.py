@@ -3,8 +3,9 @@ from flask_restful import Resource, Api
 from flask_jwt_extended import fresh_jwt_required, get_jwt_identity, jwt_required
 
 from models.user import UserModel
-from schemas import UserSchema
+from lib.schemas import UserSchema
 USER_NOT_FOUND = 'User not found.'
+USERNAME_TAKEN = 'That username has already been taken.'
 
 user_schema = UserSchema()
 
@@ -16,7 +17,7 @@ class User(Resource):
         user = user_schema.load(request.get_json())
 
         if UserModel.find_by_username(user.username):
-            return {'message': 'That username has already been taken.'}, 400
+            return {'message': USERNAME_TAKEN}, 400
 
         user.password = UserModel.set_password(user.password)
         user.save_to_db()
@@ -39,8 +40,28 @@ class User(Resource):
     @classmethod
     @fresh_jwt_required
     def put(cls):
-        # updated_user_data = user_schema.load(request.get_json(), partial=('password'))
-        return {'message': 'put request to users api'}
+        user_id = get_jwt_identity()
+        user = UserModel.find_by_id(user_id)
+        if not user:
+            return {'message': USER_NOT_FOUND}, 404
+        
+        updated_user_data = user_schema.load(request.get_json(), partial=('password',))
+        # see if username is being changed
+        new_username = updated_user_data.username
+        if new_username != user.username:
+            existing_user = UserModel.find_by_username(new_username)
+            if existing_user:
+                return {'message': USERNAME_TAKEN}, 400
+            else:
+                user.username = new_username
+
+        user.name = updated_user_data.name
+        user.save_to_db()
+        return (
+            '',
+            204,
+            {'Location': url_for('resources.users.users')}
+        )
 
     @classmethod
     @fresh_jwt_required
