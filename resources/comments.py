@@ -4,6 +4,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from models.post import PostModel
 from models.comment import CommentModel
+from models.like import LikeModel
 from lib.schemas import CommentSchema
 comment_schema = CommentSchema()
 
@@ -86,10 +87,44 @@ class Comment(Resource):
         )
 
 
+class CommentLikes(Resource):
+
+    @classmethod
+    @jwt_required
+    def post(cls, comment_id):
+        comment = CommentModel.find_by_id(comment_id)
+        if not comment:
+            return {'message': COMMENT_NOT_FOUND}, 404
+        
+        user_id = get_jwt_identity()
+        # see if the Like already exists
+        existing_like = LikeModel.find(user_id, comment_id)
+        if not existing_like:
+            # create
+            new_like = LikeModel(user_id=user_id, comment_id=comment_id)
+            new_like.save_to_db()
+            status_code = 201
+        else:
+            # delete
+            existing_like.delete_from_db()
+            status_code = 204
+        return (
+                '',
+                status_code,
+                {'Location': url_for('resources.comments.comment', comment_id=comment.id)}
+            )
+
+
+
 comments_api = Blueprint('resources.comments', __name__)
 api = Api(comments_api)
 api.add_resource(
     Comment,
     '/comment/<int:comment_id>',
     endpoint='comment'
+)
+api.add_resource(
+    CommentLikes,
+    '/comment/<int:comment_id>/like_unlike',
+    endpoint='comment_likes'
 )

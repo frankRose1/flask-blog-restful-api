@@ -11,6 +11,7 @@ class CommentModel(db.Model):
     created_date = db.Column(db.DateTime, default=datetime.now)
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+    likes = db.relationship('LikeModel', cascade='all,delete', backref='comment')
 
     @classmethod
     def find_by_id(cls, comment_id):

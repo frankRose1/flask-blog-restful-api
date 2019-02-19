@@ -65,6 +65,7 @@ def invalid_token_callback(error):
         }
     ), 422
 
+
 @app.route('/')
 def index():
     return jsonify({
