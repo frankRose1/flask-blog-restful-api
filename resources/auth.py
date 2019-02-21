@@ -11,6 +11,7 @@ from models.user import UserModel
 user_schema = UserSchema()
 
 INVALID_CREDENTIALS = 'Incorrect email or password.'
+NOT_ACTIVATED = 'This account has not been activated yet. Please check the email account that you signed up with.'
 
 
 class Login(Resource):
@@ -24,6 +25,9 @@ class Login(Resource):
             user.verify_password(user_data.password)
         except VerifyMismatchError:
             return {'message': INVALID_CREDENTIALS}, 400
+
+        if not user.activated:
+            return {'message': NOT_ACTIVATED}, 400
 
         access_token = create_access_token(identity=user.id, fresh=True)
         refresh_token = create_refresh_token(user.id)

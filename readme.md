@@ -1,10 +1,11 @@
 # Blog Rest Api with Flask
-This is the backend for a blog-style app. User's can sign up, create posts, create & like comments on posts as well.
+This is the backend for a blog-style app. User's can sign up, create posts, create & like comments on posts as well. Includes rate limiting and logic to confirm a user's email address by using mailgun. Access tokens are not provided unless the link sent via email is visited!! If you'd like to test this app out take a look at ```example.env``` for the various environment variables needed.
 
 
 ## Endpoints
 
 ### /api/v1/users
+<b>User's will not be able to recieve an access token until their email is verified</b>
   * ```POST``` - returns a 201 and sets location headers to the auth login endpoint
   * ```GET``` - returns a 200 and the currently signed in users profile. Gets the current user via auth headers
   * ```PUT``` - returns a 201 and sets location headers to the users endpoint. <b>requires a fresh access token</b>. 
@@ -15,10 +16,13 @@ This is the backend for a blog-style app. User's can sign up, create posts, crea
 ### /api/v1/users/<username>
   * ```GET``` returns a 200 and the users profile, or a 404 if it doesn't exist.
 
+### /api/v1/user/activate_account/<user_id>
+  * ```GET``` returns a 200, a message saying the user was activated, and sets location headers to the auth login api
+
 ### /api/v1/auth/login
   * ```POST``` returns a 200, an access token, and a refresh token if valid credentials(username and password) are provided
 
-### ``/api/v1/auth/refresh
+### /api/v1/auth/refresh
   * ```GET```:
     * <b>requires a refresh token in the headers</b>
     * will return a new access token, but this token will not be treated as fresh
@@ -41,9 +45,14 @@ This is the backend for a blog-style app. User's can sign up, create posts, crea
   * ```PUT``` - returns a 204 and sets location headers to comment's endpoint. allows updates on the comment body
   * ```DELETE``` - returns a 204 and sets location headers to posts endpoint
 
+### /api/v1/comment/<comment_id>/like_unlike
+  * ```POST``` - will either like or unlike a comment depending on whether a relationship is already created
+      - returns a 201 if the comment is liked(created)
+      - returns a 204 if the comment is unliked(deleted)
+
 ## Errors Status Codes
 These are some of the status codes that you may encounter
-  1) 400 - send for validation errors when creating or updating database entries (posts, comments, users). will also hav error messages.
+  1) 400 - send for bad requests or validation errors when creating or updating database entries (posts, comments, users). will also hav error messages.
   2) 401 - is sent when auth headers are missing or token has expired.
   3) 403 - sent if someone other than the resource owner is trying to make an update (eg a put request to a specific comment)
   4) 404 - sent when an enpoint isn't supported, or an entry in the database isn't found
@@ -62,3 +71,4 @@ psycopg2
 flask-jwt-extended
 argon2-cffi
 flask-limiter
+requests

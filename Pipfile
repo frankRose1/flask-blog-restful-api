@@ -17,6 +17,7 @@ psycopg2 = "*"
 flask-jwt-extended = "*"
 argon2-cffi = "*"
 flask-limiter = "*"
+requests = "*"
 
 [requires]
 python_version = "3.7"

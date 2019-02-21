@@ -4,8 +4,10 @@ from flask_jwt_extended import fresh_jwt_required, get_jwt_identity, jwt_require
 
 from models.user import UserModel
 from lib.schemas import UserSchema
+from lib.mailer import MailException
 USER_NOT_FOUND = 'User not found.'
 USERNAME_TAKEN = 'That username has already been taken.'
+EMAIL_TAKEN = 'That email has already been taken.'
 
 user_schema = UserSchema()
 
@@ -19,8 +21,17 @@ class User(Resource):
         if UserModel.find_by_username(user.username):
             return {'message': USERNAME_TAKEN}, 400
 
+        if UserModel.find_by_email(user.email):
+            return {'message': EMAIL_TAKEN}, 400
+
         user.password = UserModel.set_password(user.password)
-        user.save_to_db()
+        try:
+            user.save_to_db()
+            user.send_confirmation_email()
+        except MailException as e:
+            user.delete_from_db()
+            return {'message': str(e)}, 500
+
         return (
             '',
             201,
@@ -70,7 +81,6 @@ class User(Resource):
         user = UserModel.find_by_id(user_id)
         if not user:
             return {'message': USER_NOT_FOUND}, 404
-        # TODO delete all of the associated posts/comments
         user.delete_from_db()
         return (
             '',
@@ -89,6 +99,23 @@ class UserProfile(Resource):
         return {'user': user_schema.dump(user)}, 200
 
 
+class ActivateUserAccount(Resource):
+
+    @classmethod
+    def get(cls, user_id):
+        user = UserModel.find_by_id(user_id)
+        if not user:
+            return {'message': USER_NOT_FOUND}, 404
+        
+        user.activated = True
+        user.save_to_db()
+        return (
+            {'message': 'Your account has been activated.'},
+            200,
+            {'Location': url_for('resources.auth.login')}
+        )
+
+
 users_api = Blueprint('resources.users', __name__)
 api = Api(users_api)
 api.add_resource(
@@ -100,4 +127,9 @@ api.add_resource(
     UserProfile,
     '/users/<username>',
     endpoint="user_profile"
+)
+api.add_resource(
+    ActivateUserAccount,
+    '/user/activate_account/<int:user_id>',
+    endpoint='activate_account'
 )
