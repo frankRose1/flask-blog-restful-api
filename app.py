@@ -18,7 +18,8 @@ daily_rate = os.environ.get('GLOBAL_DAILY_RATE')
 hourly_rate = os.environ.get('GLOBAL_HOURLY_RATE')
 
 app = Flask(__name__)
-app.config['JWT_SECRET_KEY'] = os.environ.get('SECRET_KEY')
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config['PROPAGATE_EXCEPTIONS'] = True
@@ -88,5 +89,5 @@ def handle_marshmallow_validation(err):
 if __name__ == '__main__':
     db.init_app(app)
     ma.init_app(app)
-    oa.init_app(app)
+    oauth.init_app(app)
     app.run(debug=True, host='0.0.0.0', port=5000)
