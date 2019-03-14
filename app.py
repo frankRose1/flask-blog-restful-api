@@ -7,6 +7,7 @@ from marshmallow import ValidationError
 
 from lib.db import db
 from lib.ma import ma
+from lib.oa import oauth
 from resources.posts import posts_api
 from resources.users import users_api
 from resources.auth import auth_api
@@ -87,4 +88,5 @@ def handle_marshmallow_validation(err):
 if __name__ == '__main__':
     db.init_app(app)
     ma.init_app(app)
+    oa.init_app(app)
     app.run(debug=True, host='0.0.0.0', port=5000)

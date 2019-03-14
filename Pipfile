@@ -18,6 +18,7 @@ flask-jwt-extended = "*"
 argon2-cffi = "*"
 flask-limiter = "*"
 requests = "*"
+flask-oauthlib = "*"
 
 [requires]
 python_version = "3.7"
