@@ -4,6 +4,7 @@ from flask_jwt_extended import JWTManager
 from flask_limiter import Limiter
 from flask_limiter.util import get_ipaddr
 from marshmallow import ValidationError
+from dotenv import load_dotenv
 
 from lib.db import db
 from lib.ma import ma
@@ -18,11 +19,11 @@ daily_rate = os.environ.get('GLOBAL_DAILY_RATE')
 hourly_rate = os.environ.get('GLOBAL_HOURLY_RATE')
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
-app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config['PROPAGATE_EXCEPTIONS'] = True
+load_dotenv('.env', verbose=True)
+app.config.from_object('default_config')
+# any default config settings that need to be over-written can be changed the 
+# file referred to by APPLICATION_SETTINS in .env
+app.config.from_envvar('APPLICATION_SETTINGS')
 
 jwt = JWTManager(app)
 

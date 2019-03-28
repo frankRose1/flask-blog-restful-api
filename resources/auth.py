@@ -1,4 +1,4 @@
-from flask import Blueprint, request, g
+from flask import Blueprint, request, g, url_for
 from flask_restful import Resource, Api
 from flask_jwt_extended import (create_access_token, create_refresh_token,
                                 jwt_refresh_token_required, get_jwt_identity)
@@ -48,7 +48,7 @@ class GithubLogin(Resource):
     """This resource will confirm if a user allows github to release their credentials"""
     @classmethod
     def get(cls):
-        return github.authorize(callback='http://localhost:5000/api/v1/auth/github/authorized')
+        return github.authorize(callback=url_for('resources.auth.github_authorized', external=True))
 
 
 
@@ -59,19 +59,27 @@ class GithubAuthorization(Resource):
     @classmethod
     def get(cls):
         res = github.authorized_response()
+        if res is None or res['access_token'] is None:
+            # errors from github would look like ..?error=Something%20went%20wrong&error_description=Something%20else
+            error_response = {
+                'error': request.args['error'],
+                'error_description': request.args['error_description']
+            }
+            return error_response, 400
+        
         g.access_token = res['access_token']
         # gets the user info from the github client
         github_user = github.get('user')
         github_username = github_user.data['login']
+        return {'user': github_user.data}
+        # user = UserModel.find_by_username(github_username)
+        # if not user:
+        #     user = UserModel.find_by_username(username=github_username, password=None,)
+        #     user.save_to_db()
         
-        user = UserModel.find_by_username(github_username)
-        if not user:
-            user = UserModel.find_by_username(username=github_username, password=None,)
-            user.save_to_db()
-        
-        access_token = create_access_token(identity=user.id, fresh=True)
-        refresh_token = create_refresh_token(user.id)
-        return {'access_token': access_token, 'refresh_token': refresh_token}, 200
+        # access_token = create_access_token(identity=user.id, fresh=True)
+        # refresh_token = create_refresh_token(user.id)
+        # return {'access_token': access_token, 'refresh_token': refresh_token}, 200
 
 
 auth_api = Blueprint('resources.auth', __name__)
