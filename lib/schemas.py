@@ -1,4 +1,6 @@
 from . ma import ma
+from marshmallow import fields
+from werkzeug.datastructures import FileStorage
 from models.post import PostModel
 from models.user import UserModel
 from models.comment import CommentModel
@@ -32,3 +34,12 @@ class CommentSchema(ma.ModelSchema):
         model = CommentModel
         dump_only = ('id', 'created_date')
         include_fk = True
+
+
+class FileStorageField(fields.Field):
+    
+
+
+class ImageSchema(ma.Schema):
+    """This schema is only used do deserialze the incoming FileStorage object"""
+    image = FileStorageField(required=True)
