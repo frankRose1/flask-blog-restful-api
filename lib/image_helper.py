@@ -13,17 +13,17 @@ IMAGE_SET = UploadSet('images', IMAGES)
 
 def save_image(image: FileStorage, folder: str = None, name: str = None) -> str:
     """Saves FileStorage to a folder"""
-      return IMAGE_SET.save(image, folder, name)
+    return IMAGE_SET.save(image, folder, name)
 
 
 def get_path(filename: str = None, folder: str = None) -> str:
     """Returns the full path to an image"""
-      return IMAGE_SET.path(filename, folder)
+    return IMAGE_SET.path(filename, folder)
 
 
-def find_image_any_format(filename: str, folder: str) -> Union(str, None):
+def find_image_any_format(filename: str, folder: str) -> Union[str, None]:
     """Takes a filename and returns an image with any of the accepted formats 
-      if it exists
+        if it exists
     """
     for _format in IMAGES:
         image = '{}.{}'.format(filename, _format)
@@ -36,8 +36,8 @@ def find_image_any_format(filename: str, folder: str) -> Union(str, None):
 
 def _retrieve_filename(file: Union[str, FileStorage]) -> str:
     """Takes a FileStorage or string and returns the file name. Allows other 
-      helper functions to call this with either FileStorage or filename strings
-      and will always return the file name.
+        helper functions to call this with either FileStorage or filename strings
+        and will always return the file name.
     """
     if isinstance(file, FileStorage):
         return file.filename
@@ -46,7 +46,7 @@ def _retrieve_filename(file: Union[str, FileStorage]) -> str:
 
 def get_basename(file: Union[str, FileStorage]) -> str:
     """Return full name of image in a path
-      get_basename(some/folder/image.jpg) --> image.jpg
+        get_basename(some/folder/image.jpg) --> image.jpg
     """
     filename = _retrieve_filename(file)
     # split will split at the final part of the path(image.jpg) and everything
@@ -55,8 +55,8 @@ def get_basename(file: Union[str, FileStorage]) -> str:
 
 
 def get_extension(file: Union[str, FileStorage]) -> str:
-  """Return the extension of an image file
-      get_extension(image.jpg) --> .jpg
+    """Return the extension of an image file
+        get_extension(image.jpg) --> .jpg
     """
     filename = _retrieve_filename(file)
     return os.path.splitext(filename)[1]

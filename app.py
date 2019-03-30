@@ -1,6 +1,7 @@
 import os
 from flask import Flask, jsonify
 from flask_jwt_extended import JWTManager
+from flask_uploads import patch_request_class, configure_uploads
 from flask_limiter import Limiter
 from flask_limiter.util import get_ipaddr
 from marshmallow import ValidationError
@@ -9,10 +10,12 @@ from dotenv import load_dotenv
 from lib.db import db
 from lib.ma import ma
 from lib.oa import oauth
+from lib.image_helper import IMAGE_SET
 from resources.posts import posts_api
 from resources.users import users_api
 from resources.auth import auth_api
 from resources.comments import comments_api
+from resources.images import images_api
 
 API_PREFIX = '/api/v1'
 daily_rate = os.environ.get('GLOBAL_DAILY_RATE')
@@ -24,6 +27,8 @@ app.config.from_object('default_config')
 # any default config settings that need to be over-written can be changed the 
 # file referred to by APPLICATION_SETTINS in .env
 app.config.from_envvar('APPLICATION_SETTINGS')
+patch_request_class(app, 10 * 1024 * 1024) # 10 MB max
+configure_uploads(app, IMAGE_SET)
 
 jwt = JWTManager(app)
 
@@ -80,7 +85,7 @@ app.register_blueprint(posts_api, url_prefix=API_PREFIX)
 app.register_blueprint(users_api, url_prefix=API_PREFIX)
 app.register_blueprint(auth_api, url_prefix=API_PREFIX)
 app.register_blueprint(comments_api, url_prefix=API_PREFIX)
-
+app.register_blueprint(images_api, url_prefix=API_PREFIX)
 
 @app.errorhandler(ValidationError)
 def handle_marshmallow_validation(err):
@@ -91,4 +96,4 @@ if __name__ == '__main__':
     db.init_app(app)
     ma.init_app(app)
     oauth.init_app(app)
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000)

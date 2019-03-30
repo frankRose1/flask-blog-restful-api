@@ -37,7 +37,20 @@ class CommentSchema(ma.ModelSchema):
 
 
 class FileStorageField(fields.Field):
-    
+    default_error_messages = {
+        'invalid': 'Not a valid image.'
+    }
+
+
+    def _deserialize(self, value, attr, data) -> FileStorage:
+        # this method will run when image_schema.load(...data) runs
+        # will check if the value exists and that it's a FileStorage object
+        if value is None:
+            return None
+        if not isinstance(value, FileStorage):
+            self.fail('invalid') # raise a validation error
+        return value
+
 
 
 class ImageSchema(ma.Schema):
