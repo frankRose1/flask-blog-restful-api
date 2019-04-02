@@ -7,8 +7,8 @@ class PostModel(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
-    category = db.Column(db.String(50), nullable=True)
     content = db.Column(db.Text, nullable=False)
+    image = db.Column(db.String(500), nullable=True)
     created_on = db.Column(db.DateTime, default=datetime.datetime.now)
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     comments = db.relationship('CommentModel', cascade="all,delete", backref='post')

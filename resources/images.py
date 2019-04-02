@@ -1,4 +1,6 @@
-from flask import Blueprint, request
+import os
+import traceback
+from flask import Blueprint, request, send_file
 from flask_restful import Resource, Api
 from flask_uploads import UploadNotAllowed
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -22,11 +24,19 @@ class ImageUpload(Resource):
         try:
             image_path = image_helper.save_image(image=data['image'], folder=folder)
             basename = image_helper.get_basename(image_path)
-            return {'message': 'Image {basename} has been uploaded.' }, 201
+            return {'image': f'{request.url_root[:-1]}/static/images/{image_path}', 'message': f'Image {basename} has been uploaded.' }, 201
         except UploadNotAllowed:
             extension = image_helper.get_extension(data['image'])
             return {'message': f'The extension "{extension}" is not allowed.'}, 400
 
+
+class Image(Resource):
+    def get(self):
+        """Returns the requested image if it exists"""
+        pass
+
+    def delete(self):
+        pass
 
 
 images_api = Blueprint('resources.images', __name__)

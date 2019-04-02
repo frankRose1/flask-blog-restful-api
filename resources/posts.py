@@ -1,12 +1,16 @@
+import os
 from flask import Blueprint, request, url_for, abort
 from flask_restful import Resource, Api
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
+from lib.image_helper import is_filename_safe, get_path
 from models.post import PostModel
 from lib.schemas import PostSchema
 from resources.comments import CommentList
 
 POST_NOT_FOUND = 'Post not found.'
+INVALID_FILENAME = '{} is an invalid filename.'
+IMAGE_NOT_FOUND = 'Could not remove the image at {}. Image not found.'
 
 post_schema = PostSchema()
 post_list_schema = PostSchema(many=True)
@@ -76,6 +80,18 @@ class Post(Resource):
         post.title = post_data.title
         post.category = post_data.category
         post.content = post_data.content
+        # if image is updated must delete the prev one
+        if post.image != post_data.image:
+            folder = 'user_{}'.format(user_id)
+            if not is_filename_safe(post_data.image):
+                return {'message': INVALID_FILENAME.format(post_data.image)}, 400
+            try:
+                os.remove(get_path(filename=post.image, folder=folder))
+                post.image = post_data.image
+            except FileNotFoundError:
+                return {'message': IMAGE_NOT_FOUND.format(post.image)}, 404
+                
+
         post.save_to_db()
         return (
             '',

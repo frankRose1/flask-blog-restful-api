@@ -1,5 +1,5 @@
 # Blog Rest Api with Flask
-This is the backend for a blog-style app. User's can sign up, create posts, create & like comments on posts as well. Includes rate limiting and logic to confirm a user's email address by using mailgun. Access tokens are not provided unless the link sent via email is visited!! If you'd like to test this app out take a look at ```example.env``` for the various environment variables needed.
+This is the backend for a blog-style app. User's can sign up, create posts, create & like comments on posts as well. Includes rate limiting, image uplaods, and logic to confirm a user's email address via mailgun. Access tokens are not provided unless the link sent via email is visited! If you'd like to test this app out take a look at ```example.env``` for the various environment variables needed.
 
 
 ## Endpoints
@@ -50,9 +50,14 @@ This is the backend for a blog-style app. User's can sign up, create posts, crea
       - returns a 201 if the comment is liked(created)
       - returns a 204 if the comment is unliked(deleted)
 
+### /api/v1/images/upload
+  * You can upload an image and then use the returned path as the "image" field for a blog post 
+  * ```POST``` - will upload an image if the file extension is supported
+      - returns a 201 if the image is creared and a path to the image
+
 ## Errors Status Codes
 These are some of the status codes that you may encounter
-  1) 400 - send for bad requests or validation errors when creating or updating database entries (posts, comments, users). will also hav error messages.
+  1) 400 - send for bad requests or validation errors when creating or updating database entries (posts, comments, users). will also have error messages.
   2) 401 - is sent when auth headers are missing or token has expired.
   3) 403 - sent if someone other than the resource owner is trying to make an update (eg a put request to a specific comment)
   4) 404 - sent when an enpoint isn't supported, or an entry in the database isn't found
@@ -63,6 +68,7 @@ These are some of the status codes that you may encounter
 flask
 flask-restful
 flask-sqlalchemy
+flask-uploads
 flask-marshmallow
 marshmallow
 marshmallow-sqlalchemy
