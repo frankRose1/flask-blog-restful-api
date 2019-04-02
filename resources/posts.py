@@ -78,18 +78,20 @@ class Post(Resource):
             abort(403)
 
         post.title = post_data.title
-        post.category = post_data.category
         post.content = post_data.content
         # if image is updated must delete the prev one
-        if post.image != post_data.image:
+        if post.image != post_data.image and post_data.image:
             folder = 'user_{}'.format(user_id)
-            if not is_filename_safe(post_data.image):
-                return {'message': INVALID_FILENAME.format(post_data.image)}, 400
-            try:
-                os.remove(get_path(filename=post.image, folder=folder))
+            new_filename = post_data.image.split(f'user_{user_id}/')[-1]
+            if post.image:
+                existing_filename = post.image.split(f'user_{user_id}/')[-1]
+                try:
+                    os.remove(get_path(filename=existing_filename, folder=folder))
+                    post.image = post_data.image
+                except FileNotFoundError:
+                    return {'message': IMAGE_NOT_FOUND.format(existing_filename)}, 404
+            else:
                 post.image = post_data.image
-            except FileNotFoundError:
-                return {'message': IMAGE_NOT_FOUND.format(post.image)}, 404
                 
 
         post.save_to_db()
@@ -109,8 +111,17 @@ class Post(Resource):
         user_id = get_jwt_identity()
         if not post.verify_post_author(user_id):
             abort(403)
-
+        
+        if post.image:
+            folder = 'user_{}'.format(user_id)
+            filename = post.image.split(f'user_{user_id}/')[-1]
+            try:
+                os.remove(get_path(filename=filename, folder=folder))
+            except FileNotFoundError:
+                pass
+        
         post.delete_from_db()
+
         return (
             '',
             204,
@@ -127,11 +138,11 @@ api.add_resource(
 )
 api.add_resource(
     Post,
-    '/post/<int:post_id>',
+    '/posts/<int:post_id>',
     endpoint='post'
 )
 api.add_resource(
     CommentList,
-    '/post/<int:post_id>/comments',
+    '/posts/<int:post_id>/comments',
     endpoint='comments'
 )

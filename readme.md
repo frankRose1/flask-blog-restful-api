@@ -32,12 +32,12 @@ This is the backend for a blog-style app. User's can sign up, create posts, crea
   * ```GET``` - returns a 200, a list of posts, and some pagination details(next_page, prev_page, has_next, has_prev)
     * can include a query string for pagination, for example ```/api/v1/posts?page_num=3&per_page=5```
 
-### /api/v1/post/<post_id>
+### /api/v1/posts/<post_id>
   * ```GET``` - returns a 200 and the post including any associated comments. returns a 404 if no post is found
   * ```PUT``` -  returns a 204 and sets location headers to post's endpoint. will allow updates on title and content
   * ```DELETE``` - returns a 204 and sets location headers to posts endpoint. will delete any related comments
 
-### /api/v1/post/<post_id>/comments
+### /api/v1/posts/<post_id>/comments
   * ```POST``` - returns a 201 and sets location headers to the post's endpoint
 
 ### /api/v1/comment/<comment_id>

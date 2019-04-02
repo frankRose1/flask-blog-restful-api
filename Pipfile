@@ -18,7 +18,6 @@ flask-jwt-extended = "*"
 argon2-cffi = "*"
 flask-limiter = "*"
 requests = "*"
-flask-oauthlib = "*"
 flask-uploads = "*"
 
 [requires]

@@ -65,7 +65,7 @@ def get_extension(file: Union[str, FileStorage]) -> str:
 def is_filename_safe(file: Union[str, FileStorage]) -> bool:
     """Check a regex and return if string matches or not"""
     filename = _retrieve_filename(file)
-    accpeted_formats = '|'.join(IMAGES) #png|jpg|svg|jpeg
+    accepted_formats = '|'.join(IMAGES) #png|jpg|svg|jpeg
     # start with any of alphanumeric, follwed by alhpanumeric and special characters(any amount), ".", then one of the accepted formats
     regex = f'[a-zA-Z0-9][a-zA-Z0-9_()-\.]*\.({accepted_formats})$'
     #  if no match is found match() returns None
